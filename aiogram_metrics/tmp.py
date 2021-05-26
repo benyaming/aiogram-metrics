@@ -2,7 +2,7 @@ import asyncio
 import api
 
 
-dsn = 'host=localhost dbname=aiogram_metrics user=postgres password=qrx59Opri'
+dsn = 'host=localhost dbname=aiogram_metrics user=postgres password=123'
 
 
 async def main():
