@@ -9,6 +9,7 @@ verify_ssl = true
 aiogram = "*"
 aiopg = "*"
 betterlogging = "*"
+twine = "*"
 
 [requires]
 python_version = "3.7"
