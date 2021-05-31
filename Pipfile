@@ -8,7 +8,7 @@ verify_ssl = true
 [packages]
 aiogram = "*"
 aiopg = "*"
-betterlogging = "*"
+bump2version = "*"
 twine = "*"
 
 [requires]

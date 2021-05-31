@@ -1,8 +1,8 @@
 import json
+import logging
 from datetime import datetime as dt
 from typing import Optional
 
-import betterlogging
 from aiopg import create_pool
 from aiogram import Dispatcher
 from aiogram.types import Update, User
@@ -40,7 +40,7 @@ async def _get_user_locale() -> Optional[str]:
 
 
 async def register(dsn: str, table_name: str):
-    Hub.logger = betterlogging.get_colorized_logger('aiogram-metrics')
+    Hub.logger = logging.getLogger('aiogram-metrics')
 
     Hub.logger.debug('Checking database connection...')
     Hub.connection_pool = await create_pool(dsn)
@@ -60,6 +60,10 @@ async def close():
 
 
 async def handle_event(event: str = None):
+    if not Hub.is_activated:
+        logging.warning('aiogram-metrics is not registered!')
+        return
+
     update = Update.get_current()
     if update.message:
         user_id = update.message.from_user.id
