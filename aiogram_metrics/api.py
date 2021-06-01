@@ -34,7 +34,9 @@ async def _get_user_locale() -> Optional[str]:
                 continue
 
     if not lang:
-        lang = User.get_current().locale.language
+        user = User.get_current()
+        if user.locale:
+            lang = user.locale.language
 
     return lang
 
