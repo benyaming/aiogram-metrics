@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="aiogram-metrics",
-    version="0.0.8",
+    version="0.0.9",
     author="Benyamin Ginzburg",
     author_email="benyomin.94@gmail.com",
     description="Message metrics exporter for aiogram framework",
