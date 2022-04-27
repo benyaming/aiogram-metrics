@@ -74,7 +74,7 @@ async def handle_event(event: str = None):
         message_type = (update.message.get_command() and MessageType.command) or MessageType.message
         event = event or update.message.text
     elif update.callback_query:
-        user_id = update.callback_query.message.from_user.id
+        user_id = update.callback_query.message.chat.id
         message_id = update.callback_query.message.message_id
         message_data = {'callback_data': update.callback_query.data}
         message_type = MessageType.callback
