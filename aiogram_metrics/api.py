@@ -68,7 +68,7 @@ async def handle_event(event: str = None):
 
     update = Update.get_current()
     if update.message:
-        user_id = update.message.from_user.id
+        user_id = update.message.chat.id
         message_id = update.message.message_id
         message_data = {'text': update.message.text}
         message_type = (update.message.get_command() and MessageType.command) or MessageType.message
