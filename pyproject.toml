@@ -1,0 +1,32 @@
+
+[project]
+name = "aiogram-metrics"
+version = "0.1.0"
+description = "Message metrics exporter for aiogram framework"
+authors = [
+    {name = "benyamin ginzburg", email = "benyamin+git@ginzburg.io"},
+]
+dependencies = [
+    "aiogram",
+    "psycopg",
+    "bump2version",
+    "twine"
+]
+
+requires-python = ">=3.7"
+readme = "README.md"
+license = {text = "GPL-3.0"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+[[tool.pdm.source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[tool.pdm.dev-dependencies]
+dev = []
