@@ -3,11 +3,11 @@ import logging
 from datetime import datetime as dt
 from typing import Optional
 
-from aiopg import create_pool
 from aiogram import Dispatcher
 from aiogram.types import Update, User
 from aiogram.contrib.middlewares.i18n import I18nMiddleware
-from psycopg2.sql import Identifier
+from psycopg import AsyncConnection
+from psycopg.sql import Identifier
 
 from aiogram_metrics.sql import MessageType, init_table, save_event
 from aiogram_metrics.hub import Hub
@@ -30,7 +30,8 @@ async def _get_user_locale() -> Optional[str]:
             try:
                 lang = await middleware.get_user_locale('', (None,))
                 break
-            except Exception:
+            except Exception as e:
+                Hub.logger.debug(f'Caught an exception: {e}')
                 continue
 
     if not lang:
@@ -45,10 +46,10 @@ async def register(dsn: str, table_name: str):
     Hub.logger = logging.getLogger('aiogram-metrics')
 
     Hub.logger.debug('Checking database connection...')
-    Hub.connection_pool = await create_pool(dsn)
+    Hub.connection = await AsyncConnection.connect(dsn)
 
     Hub.logger.debug(f'Checking table {table_name}...')
-    Hub.table_name = Identifier(table_name).string
+    Hub.table_name = Identifier(table_name).as_string(Hub.connection)
     await init_table()
     Hub.logger.info('Registration complete! Waiting for events...')
 
@@ -56,9 +57,13 @@ async def register(dsn: str, table_name: str):
 
 
 async def close():
-    if Hub.connection_pool is not None:
-        Hub.connection_pool.close()
-        Hub.logger.info('Connection pool is now closed. Bue!')
+    if Hub.connection:
+        await Hub.connection.close()
+        Hub.logger.info('Connection is now closed. Bue!')
+
+    # if Hub.connection_pool is not None:
+    #     Hub.connection_pool.close()
+    #     Hub.logger.info('Connection pool is now closed. Bue!')
 
 
 async def handle_event(event: str = None):
@@ -67,6 +72,9 @@ async def handle_event(event: str = None):
         return
 
     update = Update.get_current()
+    if not update:
+        Hub.logger.info('No update found! Skipping...')
+
     if update.message:
         user_id = update.message.chat.id
         message_id = update.message.message_id

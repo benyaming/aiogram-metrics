@@ -1,10 +1,10 @@
 from logging import Logger
 
-from aiopg import Pool
+from psycopg import AsyncConnection
 
 
 class Hub:
     is_activated: bool = False
-    connection_pool: Pool = None
+    connection: AsyncConnection = None
     table_name: str = None
     logger: Logger
