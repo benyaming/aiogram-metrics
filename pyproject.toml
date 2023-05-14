@@ -1,6 +1,6 @@
 [project]
 name = "aiogram-metrics"
-version = "0.1.0"
+version = "1.0.0"
 description = "Message metrics exporter for aiogram framework"
 authors = [
     { name = "benyamin ginzburg", email = "benyamin+git@ginzburg.io" },
