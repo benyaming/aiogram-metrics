@@ -1,13 +1,13 @@
 [project]
 name = "aiogram-metrics"
-version = "1.0.1"
+version = "1.0.2"
 description = "Message metrics exporter for aiogram framework"
 authors = [
     { name = "benyamin ginzburg", email = "benyamin+git@ginzburg.io" },
 ]
 dependencies = [
     "aiogram",
-    "psycopg[binary]",
+    "psycopg-binary",
 ]
 requires-python = ">=3.7"
 readme = "README.md"
