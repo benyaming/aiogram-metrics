@@ -30,20 +30,8 @@ async def init_table():
         Hub.logger.error('Failed to initialize DB tables!')
         await Hub.connection.rollback()
 
-    # async with Hub.connection_pool.acquire() as conn:
-    #     async with conn.cursor() as cur:
-    #         await cur.execute(query)
-    #
-    #         if not conn.notices:
-    #             Hub.logger.debug(f'Table {Hub.table_name} successfully created!')
-    #         else:
-    #             Hub.logger.debug(f'Table {Hub.table_name} already exists, skipping...')
-
 
 async def save_event(event_data: tuple):
     query = SQL(f'INSERT INTO {Hub.table_name} VALUES (%s, %s, %s, %s, %s, %s, %s)')
     await Hub.connection.execute(query, event_data)
     await Hub.connection.commit()
-    # async with Hub.connection_pool.acquire() as conn:
-    #     async with conn.cursor() as cur:
-    #         await cur.execute(query, event_data)

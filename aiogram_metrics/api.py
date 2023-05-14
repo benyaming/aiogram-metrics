@@ -61,10 +61,6 @@ async def close():
         await Hub.connection.close()
         Hub.logger.info('Connection is now closed. Bue!')
 
-    # if Hub.connection_pool is not None:
-    #     Hub.connection_pool.close()
-    #     Hub.logger.info('Connection pool is now closed. Bue!')
-
 
 async def handle_event(event: str = None):
     if not Hub.is_activated:
