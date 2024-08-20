@@ -4,8 +4,13 @@ from datetime import datetime as dt
 from typing import Optional
 
 from aiogram import Dispatcher
-from aiogram.types import Update, User
-from aiogram.contrib.middlewares.i18n import I18nMiddleware
+from aiogram.types import Update, User, Message, CallbackQuery
+
+try:
+    from aiogram.contrib.middlewares.i18n import I18nMiddleware
+except ModuleNotFoundError:
+    from aiogram.utils.i18n.middleware import I18nMiddleware
+
 from psycopg import AsyncConnection
 from psycopg.sql import Identifier
 
@@ -18,28 +23,6 @@ __all__ = [
     'close',
     'handle_event'
 ]
-
-
-async def _get_user_locale() -> Optional[str]:
-    dp = Dispatcher.get_current()
-    lang = None
-
-    for middleware in dp.middleware.applications:
-
-        if isinstance(middleware, I18nMiddleware):
-            try:
-                lang = await middleware.get_user_locale('', (None,))
-                break
-            except Exception as e:
-                Hub.logger.debug(f'Caught an exception: {e}')
-                continue
-
-    if not lang:
-        user = User.get_current()
-        if user.locale:
-            lang = user.locale.language
-
-    return lang
 
 
 async def register(dsn: str, table_name: str):
@@ -62,31 +45,44 @@ async def close():
         Hub.logger.info('Connection is now closed. Bue!')
 
 
-async def handle_event(event: str = None):
+async def handle_event(
+    event: Optional[str] = None,
+    *,
+    update: Optional[Update] = None,
+    message: Optional[Message] = None,
+    callback_query: Optional[CallbackQuery] = None,
+    user_id: Optional[int] = None,
+):
     if not Hub.is_activated:
         logging.warning('aiogram-metrics is not registered!')
         return
 
-    update = Update.get_current()
-    if not update:
+    if not update and not message and not callback_query:
         Hub.logger.info('No update found! Skipping...')
 
-    if update.message:
-        user_id = update.message.chat.id
-        message_id = update.message.message_id
-        message_data = {'text': update.message.text}
-        message_type = (update.message.get_command() and MessageType.command) or MessageType.message
-        event = event or update.message.text
-    elif update.callback_query:
-        user_id = update.callback_query.message.chat.id
-        message_id = update.callback_query.message.message_id
-        message_data = {'callback_data': update.callback_query.data}
+    if (update and update.message) or message:
+        message = message or update.message
+        user_id = message.chat.id
+        message_id = message.message_id
+        message_data = {'text': message.text}
+        message_type = (message.text.startswith('/') and MessageType.command) or MessageType.message
+        event = event or message.text
+        language = message.from_user.language_code
+    elif (update and update.callback_query) or callback_query:
+        callback_query = callback_query or update.callback_query
+        user_id = callback_query.message.chat.id
+        message_id = callback_query.message.message_id
+        message_data = {'callback_data': callback_query.data}
         message_type = MessageType.callback
-        event = event or update.callback_query.data or update.callback_query.message.text
+        event = event or callback_query.data or callback_query.message.text
+        language = callback_query.from_user.language_code
+    elif user_id:
+        message_id = language = None
+        message_data = {}
+        message_type = MessageType.none
     else:
         raise ValueError('Unknown message type! Currently supported `message` and `callback_query`.')
 
-    language = await _get_user_locale()
     message_data = json.dumps(message_data, ensure_ascii=False, indent=2)
     event_data = (event, dt.now().isoformat(), user_id, message_id, message_type, message_data, language)
     await save_event(event_data)

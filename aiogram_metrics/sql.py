@@ -8,6 +8,7 @@ class MessageType:
     command = 'command'
     message = 'message'
     callback = 'callback'
+    none = 'none'
 
 
 async def init_table():
